@@ -107,3 +107,11 @@
     position: absolute;
     z-index: -1;
 }
+
+.sort_button {
+    background-color: #F6F9FC ;
+    outline: none ;
+    border-style: none;
+    font-weight: bold;
+    font-size: 12px;
+}
