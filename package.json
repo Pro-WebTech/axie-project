@@ -8,7 +8,8 @@
     "express": "^4.17.1",
     "fs": "0.0.1-security",
     "moment": "^2.29.1",
-    "mysql": "^2.18.1"
+    "mysql": "^2.18.1",
+    "react-chartjs-2": "^3.0.4"
   },
   "scripts": {
     "start": "node server.js",
