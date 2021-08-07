@@ -2,9 +2,9 @@ import React from "react";
 import axios from "axios";
 import Modal from "react-modal";
 import "assets/css/style.css";
-import "assets/css/sortable-tables.min.css";
+// import "assets/css/sortable-tables.min.css";
 import { SampleData } from "assets/sample_scholar";
-import "assets/sortable-tables";
+// import "assets/sortable-tables";
 import {
   Input,
   InputGroup,
@@ -76,30 +76,6 @@ class AdminNavbar extends React.Component {
       index_now: ""
     };
   }
-  async know_server() {
-
-    let status_number=0;
-    let count = 0;
-    let this_one =  this;
-    document.getElementById("cover-spin").style.display = "inherit";
-    for (let index = 0; index < SampleData.length; index++) {
-       await axios
-        .get('https://api.lunaciarover.com/stats/' + SampleData[index].ronin)
-        .then(function (response) {
-          console.log(response.data)
-          count++;
-          if (isEmptyObject(!response.data)) {
-            status_number++;
-          }
-          if (count === 10 && status_number < 3) {
-            this_one.setState({server_statue: status_number});
-          }
-        })
-        .catch(function (error) {
-        });     
-    }
-  }
-  
   async componentDidMount(){
     this.know_server();
     let this_one = this;
@@ -109,7 +85,7 @@ class AdminNavbar extends React.Component {
     if (db_data.length !== 0 ) {
       for (let index = 0; index < db_data.length; index++) {
         let ronin = db_data[index].ronin.replace("ronin:", "0x");
-        const response = (await axios.get('https://api.lunaciarover.com/stats/' + ronin));
+        var response = (await axios.get('https://api.lunaciarover.com/stats/' + ronin));
         // Calculate scholar count
         this_one.setState({ scholar_count: index + 1 });
           
@@ -227,6 +203,30 @@ class AdminNavbar extends React.Component {
       document.getElementById("cover-spin").style.display = "none";
     }
   }
+  async know_server() {
+
+    let status_number=0;
+    let count = 0;
+    let this_one =  this;
+    document.getElementById("cover-spin").style.display = "inherit";
+    for (let index = 0; index < SampleData.length; index++) {
+       await axios
+        .get('https://api.lunaciarover.com/stats/' + SampleData[index].ronin)
+        .then(function (response) {
+          count++;
+          if (isEmptyObject(!response.data)) {
+            status_number++;
+          }
+          if (count === 10 && status_number < 3) {
+            this_one.setState({server_statue: false});
+          }
+        })
+        .catch(function (error) {
+        });     
+    }
+  }
+  
+  
   handleFileRead = async () => {
     var file_data = fileReader.result;
     file_data = JSON.parse(file_data);
@@ -379,6 +379,7 @@ class AdminNavbar extends React.Component {
     }
   }
   handleFileChosen = (file) => {
+    console.log("chosen");
     fileReader = new FileReader();
     fileReader.onloadend = this.handleFileRead;
     fileReader.readAsText(file);
@@ -1248,7 +1249,7 @@ class AdminNavbar extends React.Component {
                   <Table className="align-items-center table-flush tableSorter sortable-table" responsive>
                     <thead className="thead-light">
                       <tr> 
-                        <th scope="col" className="numeric-sort">Name</th>
+                        <th scope="col">Name</th>
                         <th scope="col" className="numeric-sort">AVG</th>
                         <th scope="col" className="numeric-sort">Today SLP</th>
                         <th scope="col" className="numeric-sort">Elo</th>
@@ -1259,7 +1260,7 @@ class AdminNavbar extends React.Component {
                         <th scope="col" className="numeric-sort">Scholar</th>
                         <th scope="col" className="numeric-sort">Manager</th>
                         <th scope="col" className="numeric-sort">Total</th>
-                        <th scope="col" className="numeric-sort">Manage</th>
+                        <th scope="col">Manage</th>
                       </tr>
                     </thead>
                     {this.state.data.length === 0 ?

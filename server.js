@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors')
 const path = require('path')
 const moment = require('moment');
+const axios = require('axios');
 
 const app = express();
 const port = process.env.PORT || 80;
@@ -25,7 +26,7 @@ var pool      =    mysql.createPool({
     debug    :  false
 });
 
-var midnight = "0:00:00";
+var midnight = "0:00:10";
 var now = null;
 
 setInterval(function () {
@@ -33,6 +34,12 @@ setInterval(function () {
     now = utcMoment.format("H:mm:ss");
     if (now === midnight) {
         console.log("Hi, happy new day.");
+        pool.getConnection(function(err,connection){
+            connection.query("SELECT ronin from users", (err, rows) => {
+                connection.release()
+                console.log(rows)
+            })
+        });
     }
 }, 1000);
 
