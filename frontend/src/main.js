@@ -17,11 +17,13 @@ import {
   CardHeader,
   CardFooter,
   Table,
-
 } from "reactstrap";
 import Button1 from "components/UI/Button1";
 import { isEmptyObject } from "jquery";
 import $ from "jquery";
+
+import BarChart from "components/UI/barchart";
+import * as moment from 'moment';
 
 Modal.setAppElement("#root");
 
@@ -37,6 +39,13 @@ const customStyles = {
     borderRadius: '10px'
   },
 };
+
+const detailModalStyle = {
+  content: {
+    backgroundColor: '#7E60E4',
+    borderRadius: '10px'
+  },
+}
 let fileReader;
 class AdminNavbar extends React.Component {
   constructor(props) {
@@ -48,6 +57,7 @@ class AdminNavbar extends React.Component {
     this.handleFileRead = this.handleFileRead.bind(this)
     this.state = {
       data: [],
+      date: [],
       order: [1,1,1,1,1,1,1,1,1,1,1],
       server_statue: true,
       name_group: [],
@@ -73,13 +83,26 @@ class AdminNavbar extends React.Component {
       name_now: "",
       ronin_now: "",
       manager_percent_now: "",
-      index_now: ""
+      index_now: "",
+
+      modal_detail: false,
+      day_data:[],
+      selected_ronin: ''
     };
+    this.tog_standard = this.tog_standard.bind(this);
   }
+  tog_standard(ronin) {
+      console.log(ronin);
+      this.setState({selected_ronin: ronin});
+      this.setState(prevState => ({
+          modal_detail: !prevState.modal_detail
+      }));
+  }
+
   async componentDidMount(){
     this.know_server();
     let this_one = this;
-    console.log(this.state.server_statue);
+    // console.log(this.state.server_statue);
     
     const db_data = (await axios.get('http://localhost/ronins')).data;
     if (db_data.length !== 0 ) {
@@ -202,6 +225,26 @@ class AdminNavbar extends React.Component {
     else {
       document.getElementById("cover-spin").style.display = "none";
     }
+
+    const db_day_data = (await axios.get('http://localhost/daydata')).data;
+     if (db_day_data.length !== 0 ) {
+       console.log(db_day_data);
+       this.setState({day_data: db_day_data})
+     }
+     else{
+       document.getElementById("cover-spin").style.display = "none";
+     }
+
+     const today = new Date()
+     const start_date = new Date(today);
+     start_date.setDate(start_date.getDate() - 7 );
+     const { date } = this.state;
+     for ( var i = 0; i < 7; i++){
+       date.push( moment(start_date).format('YYYY-MM-DD'));
+       start_date.setDate(start_date.getDate() + 1);
+     }
+     this.setState( {date} );
+     console.log(date);
   }
   async know_server() {
 
@@ -1049,7 +1092,9 @@ class AdminNavbar extends React.Component {
     var table_data = this.state.data.map((anObjectMapped, index) => {
       return (
         <tr key={index}>
-          <td>{anObjectMapped.name}</td>
+          <td>
+          <button className = "detail_button" onClick={() => this.tog_standard(anObjectMapped.ronin)}>{anObjectMapped.name}</button>
+          </td>
           <td>{anObjectMapped.avg}</td>
           <td>{anObjectMapped.today_so}</td>
           <td>{anObjectMapped.elo}</td>
@@ -1067,7 +1112,37 @@ class AdminNavbar extends React.Component {
         </tr>
       );
     })
-    const { order } = this.state;
+    var bar_data = [];
+    const { order, selected_ronin, day_data } = this.state;
+    day_data.map((element, index) =>{
+      // console.log('e', element);
+      if (element.name === selected_ronin){
+        bar_data.push(element.before7);
+        bar_data.push(element.before6);
+        bar_data.push(element.before5);
+        bar_data.push(element.before4);
+        bar_data.push(element.before3);
+        bar_data.push(element.before2);
+        bar_data.push(element.yesterday);
+      }
+    })
+    // console.log("bar_data", bar_data);
+    const { date } = this.state;
+    // console.log(date)
+    const data1={
+          labels: date,
+          lineTension: 0,  
+          datasets: [
+              {
+                  fill: false,
+                  borderColor: "rgba(52, 195, 143, 0.8)",
+                  borderWidth: 3,
+                  hoverBackgroundColor: "rgba(52, 195, 143, 0.9)",
+                  hoverBorderColor: "rgba(52, 195, 143, 0.9)",
+                  data: bar_data
+              }
+          ]
+      }
     return (
       <>
         <Navbar id="navbar-main" >
@@ -1302,7 +1377,6 @@ class AdminNavbar extends React.Component {
             </div>
           </Container>
           <Container className="mt-3" fluid>
-            {/* Table */}
             <Row>
               <div className="col">
                 <Card className="shadow">
@@ -1492,6 +1566,41 @@ class AdminNavbar extends React.Component {
                   Add account
                 </Button>
               </center>
+            </Modal>
+
+            <Modal
+                isOpen={this.state.modal_detail}
+                toggle={this.tog_standard}
+                style={detailModalStyle}
+            >
+                <Row>
+                  <Col  xl={12}>
+                    <Card>
+                    <CardTitle className="mb-6"
+                                style={{ fontWeight: 700, fontSize: "24px", lineHeight: "24px", padding: "1em"}}>
+                        Data
+                    </CardTitle>
+                       <CardBody>
+                        <BarChart data = {data1}/>
+                      </CardBody>
+                    </Card>
+                    <CardFooter>
+                      <Row>
+                        <Col xl={10}></Col>
+                        <Col xl={2}>
+                        <Button
+                              type="button"
+                              onClick={this.tog_standard}
+                              color="danger"
+                              className="waves-effect"
+                          >
+                              Close
+                          </Button>
+                        </Col>
+                      </Row>
+                    </CardFooter>
+                  </Col>
+                </Row>
             </Modal>
             <div id="cover-spin"></div>
           </Container>

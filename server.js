@@ -46,6 +46,8 @@ setInterval(function () {
 const check_tbl_query = "SELECT count(*) from information_schema.tables WHERE table_schema = 'sql6429122' AND table_name = 'users' LIMIT 1;"
 const create_tbl_query = "CREATE TABLE users(id int NOT NULL AUTO_INCREMENT, name VARCHAR(50), ronin VARCHAR(255), percent_manager int,  PRIMARY KEY (id));"
 const get_all_users = "SELECT * from users"
+const get_all_day_data = "SELECT * from dayscholars"
+
 pool.getConnection(function(err,connection){
     if (err) {
       connection.release();
@@ -54,6 +56,17 @@ pool.getConnection(function(err,connection){
     }   
     console.log('connected as id ' + connection.threadId);
 });
+
+app.get("/daydata", function(req, res) {
+    pool.getConnection((err, connection) => {
+        if(!err) 
+            connection.query(get_all_day_data, (err, rows) => {
+                console.log("daydata", rows)
+                connection.release()
+                res.send(rows);
+            })
+        })
+    })
 
 
 app.get("/ronins",function(req,res){

@@ -115,3 +115,10 @@
     font-weight: bold;
     font-size: 12px;
 }
+
+.detail_button{
+    background-color: #FFFFFF ;
+    outline: none ;
+    border-style: none;
+    color:  #11CDEF;
+}
