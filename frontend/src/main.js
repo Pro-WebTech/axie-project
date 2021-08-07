@@ -2,9 +2,7 @@ import React from "react";
 import axios from "axios";
 import Modal from "react-modal";
 import "assets/css/style.css";
-// import "assets/css/sortable-tables.min.css";
 import { SampleData } from "assets/sample_scholar";
-// import "assets/sortable-tables";
 import {
   Input,
   InputGroup,
@@ -21,6 +19,7 @@ import {
   Table,
 
 } from "reactstrap";
+import Button1 from "components/UI/Button1";
 import { isEmptyObject } from "jquery";
 import $ from "jquery";
 
@@ -49,6 +48,7 @@ class AdminNavbar extends React.Component {
     this.handleFileRead = this.handleFileRead.bind(this)
     this.state = {
       data: [],
+      order: [1,1,1,1,1,1,1,1,1,1,1],
       server_statue: true,
       name_group: [],
       ronin_address_group: [],
@@ -586,6 +586,82 @@ class AdminNavbar extends React.Component {
     }
   }
 
+  sortFunction(item, index){
+    var { data, order } = this.state;
+    
+    console.log("original ",  data);
+    var temp = [];
+    if (order[index] == 1){
+      for ( var i = 0 ; i < data.length - 1 ; i++){
+        for ( var j = i + 1 ; j < data.length; j ++){
+            if ( data[i][item] > data[j][item]){
+                temp = data[i];
+                data[i] = data[j];
+                data[j] = temp;
+            }
+        }
+      }
+      order[index] = 0;
+    }
+    else{
+      for ( var i = 0 ; i < data.length - 1 ; i++){
+        for ( var j = i + 1 ; j < data.length; j ++){
+            if ( data[i][item] < data[j][item]){
+                temp = data[i];
+                data[i] = data[j];
+                data[j] = temp;
+            }
+        }
+      }
+      order[index] = 1;
+    }
+    this.setState({data, order});
+  }
+
+  setSortedField( item) {
+    var { data } = this.state;
+    var sortedData = [];
+    // 
+    switch (item) {
+      case "name":
+        this.sortFunction("name", 0);
+        break;
+      case "avg":
+        this.sortFunction("avg", 1);
+        break;
+      case "slp":
+        this.sortFunction("slp", 2);        
+        break;
+      case "elo":
+        this.sortFunction("elo", 3);        
+        break;
+      case "last":
+        this.sortFunction("last_claim", 4);        
+        break;
+      case "unclaimed":
+        this.sortFunction("unclaimed", 6);        
+        break;
+      case "ronin":
+        this.sortFunction("ronin", 7);        
+        break;
+      case "scholar":
+        this.sortFunction("scholar", 8);        
+        break;
+      case "manager":
+        this.sortFunction("manager", 9);       
+        break;
+      case "total":
+        this.sortFunction("total", 10);       
+        break;
+      case "next":
+        this.sortFunction("last_claim", 5);
+        break;
+      default:
+        break;
+    }
+    
+    // this.setState( { data: sortedData });
+  }
   async reload() {
     let data = this.state.data;
     let this_one = this;
@@ -707,7 +783,7 @@ class AdminNavbar extends React.Component {
           console.log(error);
         });     
     }
-    console.log(this.state.data);
+    console.log("reload:", this.state.data);
   }
   edit_complete(e) {
     // Validation the input data
@@ -969,7 +1045,7 @@ class AdminNavbar extends React.Component {
 
   }
   render() {
-    console.log(this.state.data, this.state.server_statue);
+    // console.log(this.state.data, this.state.server_statue);
     var table_data = this.state.data.map((anObjectMapped, index) => {
       return (
         <tr key={index}>
@@ -991,6 +1067,7 @@ class AdminNavbar extends React.Component {
         </tr>
       );
     })
+    const { order } = this.state;
     return (
       <>
         <Navbar id="navbar-main" >
@@ -1249,18 +1326,132 @@ class AdminNavbar extends React.Component {
                   <Table className="align-items-center table-flush tableSorter sortable-table" responsive>
                     <thead className="thead-light">
                       <tr> 
-                        <th scope="col">Name</th>
-                        <th scope="col" className="numeric-sort">AVG</th>
-                        <th scope="col" className="numeric-sort">Today SLP</th>
-                        <th scope="col" className="numeric-sort">Elo</th>
-                        <th scope="col" className="numeric-sort">Last claim</th>
-                        <th scope="col" className="numeric-sort">Next claim</th>
-                        <th scope="col" className="numeric-sort">Unclaimed</th>
-                        <th scope="col" className="numeric-sort">Ronin SLP</th>
-                        <th scope="col" className="numeric-sort">Scholar</th>
-                        <th scope="col" className="numeric-sort">Manager</th>
-                        <th scope="col" className="numeric-sort">Total</th>
-                        <th scope="col">Manage</th>
+                        <th scope="col">
+                          <button className = "sort_button" onClick={() => this.setSortedField('name')}>
+                             Name 
+                             {order[0] ===1 &&
+                             String.fromCharCode(8593)
+                              }
+                              {order[0] ===0 &&
+                             String.fromCharCode(8595)
+                              }
+                          </button>
+                        </th>
+                        <th scope="col">
+                          <button className= "sort_button" onClick={() => this.setSortedField('avg')}>
+                            AVG
+                            {order[1] ===1 &&
+                             String.fromCharCode(8593)
+                              }
+                              {order[1] ===0 &&
+                             String.fromCharCode(8595)
+                              }
+                          </button>
+                        </th>
+                        <th scope="col">
+                          <button className= "sort_button" onClick={() => this.setSortedField('slp')}>
+                            Today SLP
+                            {order[2] ===1 &&
+                             String.fromCharCode(8593)
+                              }
+                              {order[2] ===0 &&
+                             String.fromCharCode(8595)
+                              }
+                          </button>
+                        </th>
+                        <th scope="col">
+                          <button className= "sort_button" onClick={() => this.setSortedField('elo')}>
+                            Elo
+                            {order[3] ===1 &&
+                             String.fromCharCode(8593)
+                              }
+                              {order[3] ===0 &&
+                             String.fromCharCode(8595)
+                              }
+                          </button>
+                        </th>
+                        <th scope="col">
+                          <button className= "sort_button" onClick={() => this.setSortedField('last')}>  
+                            Last claim
+                            {order[4] ===1 &&
+                             String.fromCharCode(8593)
+                              }
+                              {order[4] ===0 &&
+                             String.fromCharCode(8595)
+                              }
+                          </button>
+                        </th>
+                        <th scope="col">
+                          <button className= "sort_button" onClick={() => this.setSortedField('next')}>  
+                           Next claim
+                           {order[5] ===1 &&
+                             String.fromCharCode(8593)
+                              }
+                              {order[5] ===0 &&
+                             String.fromCharCode(8595)
+                              }
+                          </button>
+                        </th>
+                        <th scope="col">
+                          <button className= "sort_button" onClick={() => this.setSortedField('unclaimed')}>  
+                            Unclaimed
+                            {order[6] ===1 &&
+                             String.fromCharCode(8593)
+                              }
+                              {order[6] ===0 &&
+                             String.fromCharCode(8595)
+                              }
+                          </button>
+                        </th>
+                        <th scope="col">
+                          <button className = "sort_button" onClick={() => this.setSortedField('ronin')}>
+                            Ronin SLP
+                            {order[7] ===1 &&
+                             String.fromCharCode(8593)
+                              }
+                              {order[7] ===0 &&
+                             String.fromCharCode(8595)
+                              }
+                          </button>
+                        </th>
+                        <th scope="col">
+                          <button className = "sort_button" onClick={() => this.setSortedField('scholar')}>
+                           Scholar
+                           {order[8] ===1 &&
+                             String.fromCharCode(8593)
+                              }
+                              {order[8] ===0 &&
+                             String.fromCharCode(8595)
+                              }
+                          </button>
+                        </th>
+                        <th scope="col">
+                          <button className = "sort_button" onClick={() => this.setSortedField('manager')}>
+                            Manager
+                            {order[9] ===1 &&
+                             String.fromCharCode(8593)
+                              }
+                              {order[9] ===0 &&
+                             String.fromCharCode(8595)
+                              }
+                          </button>
+                        </th>
+                        <th scope="col">
+                          <button className = "sort_button" onClick={() => this.setSortedField('total')}>
+                            Total
+                            {order[10] ===1 &&
+                             String.fromCharCode(8593)
+                              }
+                              {order[10] ===0 &&
+                             String.fromCharCode(8595)
+                              }
+                          </button>
+                        </th>
+                        <th scope="col">
+                          <button className = "sort_button" onClick={() => this.setSortedField('manage')}>
+                           Manage
+                          </button>
+                        </th>
                       </tr>
                     </thead>
                     {this.state.data.length === 0 ?
