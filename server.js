@@ -47,6 +47,7 @@ const check_tbl_query = "SELECT count(*) from information_schema.tables WHERE ta
 const create_tbl_query = "CREATE TABLE users(id int NOT NULL AUTO_INCREMENT, name VARCHAR(50), ronin VARCHAR(255), percent_manager int,  PRIMARY KEY (id));"
 const get_all_users = "SELECT * from users"
 const get_all_day_data = "SELECT * from dayscholars"
+const get_total_day_scholar = "SELECT * from total_dayscholar"
 
 pool.getConnection(function(err,connection){
     if (err) {
@@ -60,13 +61,24 @@ pool.getConnection(function(err,connection){
 app.get("/daydata", function(req, res) {
     pool.getConnection((err, connection) => {
         if(!err) 
-            connection.query(get_all_day_data, (err, rows) => {
-                console.log("daydata", rows)
-                connection.release()
-                res.send(rows);
-            })
+        connection.query(get_all_day_data, (err, rows) => {
+            console.log("daydata", rows)
+            connection.release()
+            res.send(rows);
         })
     })
+})
+
+app.get("/total_daydata", function(req, res) {
+    pool.getConnection((err, connection) => {
+        if(!err) 
+        connection.query(get_total_day_scholar, (err, rows) => {
+            console.log("total", rows)
+            connection.release()
+            res.send(rows);
+        })
+    })
+})
 
 
 app.get("/ronins",function(req,res){

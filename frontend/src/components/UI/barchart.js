@@ -18,10 +18,10 @@ class BarChart extends Component {
                 display: false
             },
             scales: {
-                xAxes: [{
-                    barPercentage: 0.6,
-                    display: false,
-                }],
+                // xAxes: [{
+                //     barPercentage: 0.6,
+                //     display: false,
+                // }],
                 yAxes: [
                     {
                       ticks: {

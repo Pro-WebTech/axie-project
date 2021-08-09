@@ -14,11 +14,9 @@ import {
   Container,
   Row,
   Col,
-  CardHeader,
   CardFooter,
   Table,
 } from "reactstrap";
-import Button1 from "components/UI/Button1";
 import { isEmptyObject } from "jquery";
 import $ from "jquery";
 
@@ -92,7 +90,6 @@ class AdminNavbar extends React.Component {
     this.tog_standard = this.tog_standard.bind(this);
   }
   tog_standard(ronin) {
-      console.log(ronin);
       this.setState({selected_ronin: ronin});
       this.setState(prevState => ({
           modal_detail: !prevState.modal_detail
@@ -634,7 +631,7 @@ class AdminNavbar extends React.Component {
     
     console.log("original ",  data);
     var temp = [];
-    if (order[index] == 1){
+    if (order[index] === 1){
       for ( var i = 0 ; i < data.length - 1 ; i++){
         for ( var j = i + 1 ; j < data.length; j ++){
             if ( data[i][item] > data[j][item]){
@@ -647,12 +644,12 @@ class AdminNavbar extends React.Component {
       order[index] = 0;
     }
     else{
-      for ( var i = 0 ; i < data.length - 1 ; i++){
-        for ( var j = i + 1 ; j < data.length; j ++){
-            if ( data[i][item] < data[j][item]){
-                temp = data[i];
-                data[i] = data[j];
-                data[j] = temp;
+      for ( var k = 0 ; k < data.length - 1 ; k++){
+        for ( var m = k + 1 ; m < data.length; m ++){
+            if ( data[k][item] < data[m][item]){
+                temp = data[k];
+                data[k] = data[m];
+                data[m] = temp;
             }
         }
       }
@@ -662,8 +659,6 @@ class AdminNavbar extends React.Component {
   }
 
   setSortedField( item) {
-    var { data } = this.state;
-    var sortedData = [];
     // 
     switch (item) {
       case "name":
@@ -1088,7 +1083,6 @@ class AdminNavbar extends React.Component {
 
   }
   render() {
-    // console.log(this.state.data, this.state.server_statue);
     var table_data = this.state.data.map((anObjectMapped, index) => {
       return (
         <tr key={index}>
@@ -1114,8 +1108,8 @@ class AdminNavbar extends React.Component {
     })
     var bar_data = [];
     const { order, selected_ronin, day_data } = this.state;
+
     day_data.map((element, index) =>{
-      // console.log('e', element);
       if (element.name === selected_ronin){
         bar_data.push(element.before7);
         bar_data.push(element.before6);
@@ -1126,23 +1120,21 @@ class AdminNavbar extends React.Component {
         bar_data.push(element.yesterday);
       }
     })
-    // console.log("bar_data", bar_data);
-    const { date } = this.state;
-    // console.log(date)
+    
     const data1={
-          labels: date,
-          lineTension: 0,  
-          datasets: [
-              {
-                  fill: false,
-                  borderColor: "rgba(52, 195, 143, 0.8)",
-                  borderWidth: 3,
-                  hoverBackgroundColor: "rgba(52, 195, 143, 0.9)",
-                  hoverBorderColor: "rgba(52, 195, 143, 0.9)",
-                  data: bar_data
-              }
-          ]
-      }
+        labels: this.state.date,
+        lineTension: 0,  
+        datasets: [
+            {
+                fill: false,
+                borderColor: "rgba(52, 195, 143, 0.8)",
+                borderWidth: 3,
+                hoverBackgroundColor: "rgba(52, 195, 143, 0.9)",
+                hoverBorderColor: "rgba(52, 195, 143, 0.9)",
+                data: bar_data
+            }
+        ]
+    }
     return (
       <>
         <Navbar id="navbar-main" >
@@ -1367,6 +1359,30 @@ class AdminNavbar extends React.Component {
                         <Col className="col-auto">
                           <div className="icon icon-shape bg-green text-white rounded-circle shadow">
                             <i className="fas fa-calendar-alt"></i>
+                          </div>
+                        </Col>
+                      </Row>
+                    </CardBody>
+                  </Card>
+                </Col>
+                <Col lg="6" md="6" sm="6" xl="3" className="mt-3" onClick={() => this.tog_standard("ronin:31a2622da4685f3d35e277a9245d230155bc8385")} >
+                  <Card className="card-stats mb-xl-0">
+                    <CardBody>
+                      <Row>
+                        <div className="col">
+                          <CardTitle
+                            tag="h4"
+                            className="text-uppercase text-muted mb-0"
+                          >
+                            Total Scholars Chart
+                          </CardTitle>
+                          <span className="h1 font-weight-bold mb-0">
+                            Daily total scholar 
+                          </span>
+                        </div>
+                        <Col className="col-auto">
+                          <div className="icon icon-shape bg-red text-white rounded-circle shadow">
+                            <i className="fas fa-chart-bar"></i>
                           </div>
                         </Col>
                       </Row>
