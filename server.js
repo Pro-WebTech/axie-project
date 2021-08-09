@@ -10,6 +10,11 @@ const app = express();
 const port = process.env.PORT || 80;
 app.use(cors())
 
+app.get('/*', (req, res) => {
+	res.sendFile(path.join(__dirname, 'frontend/build', 'index.html'));
+	//res.sendFile(path.join(__dirname, 'frontend/public', 'index.html'));
+});
+
 app.use(express.static(path.join(__dirname, 'build')));
 
 
@@ -180,10 +185,6 @@ app.post("/edit-ronin", function (req, res) {
 })
 
 
-app.get('/*', (req, res) => {
-	res.sendFile(path.join(__dirname, 'frontend/build', 'index.html'));
-	//res.sendFile(path.join(__dirname, 'frontend/public', 'index.html'));
-});
 
 
 app.listen(port, () => console.log(`Listening on port ${port}`))
