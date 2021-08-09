@@ -82,7 +82,7 @@ class AdminNavbar extends React.Component {
       ronin_now: "",
       manager_percent_now: "",
       index_now: "",
-
+      total_day_data: "",
       modal_detail: false,
       day_data:[],
       selected_ronin: ''
@@ -170,13 +170,7 @@ class AdminNavbar extends React.Component {
         const next_claim_date = next_date_ready.toLocaleDateString();
 
         // Get the elo
-        var elo;
-        if (response.data.leaderboard == null) {
-          elo = 0
-        }
-        else {
-          elo = response.data.leaderboard.elo;
-        }
+        var elo = response.data.mmr;
 
         // Make array Data
 
@@ -225,8 +219,15 @@ class AdminNavbar extends React.Component {
 
     const db_day_data = (await axios.get('http://localhost/daydata')).data;
      if (db_day_data.length !== 0 ) {
-       console.log(db_day_data);
        this.setState({day_data: db_day_data})
+     }
+     else{
+       document.getElementById("cover-spin").style.display = "none";
+     }
+
+     const total_dayscholar = (await axios.get('http://localhost/total_daydata')).data;
+     if (total_dayscholar.length !== 0 ) {
+       this.setState({total_day_data: total_dayscholar})
      }
      else{
        document.getElementById("cover-spin").style.display = "none";
@@ -271,8 +272,6 @@ class AdminNavbar extends React.Component {
     var file_data = fileReader.result;
     file_data = JSON.parse(file_data);
     console.log(typeof file_data, file_data);
-
-    
     let this_one = this;
     for (let index = 0; index < file_data.length; index++) {
       let ronin = file_data[index].eth.replace("ronin:", "0x");
@@ -345,13 +344,9 @@ class AdminNavbar extends React.Component {
             const next_claim_date = next_date_ready.toLocaleDateString();
 
             // Get the elo
-            var elo;
-            if (response.data.leaderboard == null) {
-              elo = 0
-            }
-            else {
-              elo = response.data.leaderboard.elo;
-            }
+            var elo = response.data.mmr;
+            
+            
 
             // Make array Data
 
@@ -546,13 +541,9 @@ class AdminNavbar extends React.Component {
 
 
             // Get the elo
-            let elo;
-            if (response.data.leaderboard == null) {
-              elo = 0
-            }
-            else {
-              elo = response.data.leaderboard.elo;
-            }
+            let elo = response.data.mmr;
+            
+            
             
 
             // Make array Data
@@ -714,7 +705,6 @@ class AdminNavbar extends React.Component {
         .get('https://api.lunaciarover.com/stats/' + ronin)
         .then(function (response) {
 
-
             // Calculate scholar count
             this_one.setState({ scholar_count: index + 1 });
 
@@ -761,13 +751,9 @@ class AdminNavbar extends React.Component {
             const next_claim_date = next_date_ready.toLocaleDateString();
 
             // Get the elo
-            var elo;
-            if (response.data.leaderboard == null) {
-              elo = 0
-            }
-            else {
-              elo = response.data.leaderboard.elo;
-            }
+            var elo = response.data.mmr;
+            
+            
 
             // Make array Data
 
@@ -806,7 +792,6 @@ class AdminNavbar extends React.Component {
               document.getElementById("cover-spin").style.display = "none";
 
             }
-            // document.getElementsByClassName("input-header").style.display = "none";
         })
         .catch(function (error) {
           alert("No response!")
@@ -926,13 +911,9 @@ class AdminNavbar extends React.Component {
 
 
             // Get the elo
-            let elo;
-            if (response.data.leaderboard == null) {
-              elo = 0
-            }
-            else {
-              elo = response.data.leaderboard.elo;
-            }
+            let elo = response.data.mmr;
+            
+            
 
             // Make array Data
 
@@ -1086,11 +1067,11 @@ class AdminNavbar extends React.Component {
     var table_data = this.state.data.map((anObjectMapped, index) => {
       return (
         <tr key={index}>
-          <td>
-          <button className = "detail_button" onClick={() => this.tog_standard(anObjectMapped.ronin)}>{anObjectMapped.name}</button>
+          <td onClick={() => this.tog_standard(anObjectMapped.ronin)} className = "chart_day"> 
+          <button className = "detail_button" >{anObjectMapped.name}</button>
           </td>
           <td>{anObjectMapped.avg}</td>
-          <td>{anObjectMapped.today_so}</td>
+          {/* <td>{anObjectMapped.today_so}</td> */}
           <td>{anObjectMapped.elo}</td>
           <td>{anObjectMapped.last_claim}</td>
           <td>{anObjectMapped.next_claim}</td>
@@ -1107,8 +1088,19 @@ class AdminNavbar extends React.Component {
       );
     })
     var bar_data = [];
-    const { order, selected_ronin, day_data } = this.state;
-
+    const { order, selected_ronin, day_data, total_day_data } = this.state;
+    if (selected_ronin === "total") {
+      total_day_data.map((element, index) =>{
+          bar_data.push(element.before7);
+          bar_data.push(element.before6);
+          bar_data.push(element.before5);
+          bar_data.push(element.before4);
+          bar_data.push(element.before3);
+          bar_data.push(element.before2);
+          bar_data.push(element.yesterday);
+        })
+    }
+    
     day_data.map((element, index) =>{
       if (element.name === selected_ronin){
         bar_data.push(element.before7);
@@ -1365,7 +1357,7 @@ class AdminNavbar extends React.Component {
                     </CardBody>
                   </Card>
                 </Col>
-                <Col lg="6" md="6" sm="6" xl="3" className="mt-3" onClick={() => this.tog_standard("ronin:31a2622da4685f3d35e277a9245d230155bc8385")} >
+                <Col lg="6" md="6" sm="6" xl="3" className="mt-3 total_chart" onClick={() => this.tog_standard("total")} >
                   <Card className="card-stats mb-xl-0">
                     <CardBody>
                       <Row>
@@ -1438,7 +1430,7 @@ class AdminNavbar extends React.Component {
                               }
                           </button>
                         </th>
-                        <th scope="col">
+                        {/* <th scope="col">
                           <button className= "sort_button" onClick={() => this.setSortedField('slp')}>
                             Today SLP
                             {order[2] ===1 &&
@@ -1448,7 +1440,7 @@ class AdminNavbar extends React.Component {
                              String.fromCharCode(8595)
                               }
                           </button>
-                        </th>
+                        </th> */}
                         <th scope="col">
                           <button className= "sort_button" onClick={() => this.setSortedField('elo')}>
                             Elo
@@ -1591,9 +1583,8 @@ class AdminNavbar extends React.Component {
             >
                 <Row>
                   <Col  xl={12}>
-                    <Card>
-                    <CardTitle className="mb-6"
-                                style={{ fontWeight: 700, fontSize: "24px", lineHeight: "24px", padding: "1em"}}>
+                    <Card className = "modal-card">
+                    <CardTitle style={{ fontWeight: 700, fontSize: "24px", lineHeight: "24px", padding: "1em", margin:"0px"}}>
                         Data
                     </CardTitle>
                        <CardBody>

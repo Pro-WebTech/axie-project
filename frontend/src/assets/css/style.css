@@ -122,3 +122,21 @@
     border-style: none;
     color:  #11CDEF;
 }
+.chart_day{
+    cursor: pointer;
+}
+
+canvas {
+    height: 520px !important;
+}
+
+.modal-card {
+    border-radius: 0;
+    border-top-left-radius: 0.375rem;
+    border-top-right-radius: 0.375rem;
+
+}
+
+.total_chart {
+    cursor: pointer;
+}

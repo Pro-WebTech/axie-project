@@ -48,6 +48,7 @@ const create_tbl_query = "CREATE TABLE users(id int NOT NULL AUTO_INCREMENT, nam
 const get_all_users = "SELECT * from users"
 const get_all_day_data = "SELECT * from dayscholars"
 const get_total_day_scholar = "SELECT * from total_dayscholar"
+const get_all_sums = "SELECT SUM(before7) as before7, SUM(before6) as before6 , SUM(before5) as before5, SUM(before4) as before4, SUM(before3) as before3, SUM(before2) as before2, SUM(yesterday) as yesterday from dayscholars"
 
 pool.getConnection(function(err,connection){
     if (err) {
@@ -72,10 +73,15 @@ app.get("/daydata", function(req, res) {
 app.get("/total_daydata", function(req, res) {
     pool.getConnection((err, connection) => {
         if(!err) 
-        connection.query(get_total_day_scholar, (err, rows) => {
-            console.log("total", rows)
-            connection.release()
-            res.send(rows);
+        connection.query(get_all_sums, (err, result) => {
+            if(!err)
+            connection.query("UPDATE total_dayscholar SET before7 = '" + result[0].before7 + "' , before6 ='" + result[0].before6 + "', before5 ='" + result[0].before5 + "', before4 ='" + result[0].before4 + "', before3 ='" + result[0].before3 + "', before2 ='" + result[0].before2 + "', yesterday = '" + result[0].yesterday + "';", (err, rows) => {
+                if(!err)
+                    connection.query(get_total_day_scholar, (err, rows) => {
+                        connection.release()
+                        res.send(rows);
+                    })
+            })
         })
     })
 })
@@ -176,8 +182,5 @@ app.post("/edit-ronin", function (req, res) {
 // 	//res.sendFile(path.join(__dirname, 'frontend/public', 'index.html'));
 // });
 
-app.get("/get-all-data", function (req, res) {
-    
-})
 
 app.listen(port, () => console.log(`Listening on port ${port}`))
