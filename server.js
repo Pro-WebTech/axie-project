@@ -10,6 +10,9 @@ const app = express();
 const port = process.env.PORT || 80;
 app.use(cors())
 
+app.use(express.static(path.join(__dirname, 'build')));
+
+
 
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }))
