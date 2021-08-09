@@ -92,7 +92,7 @@ setInterval(function () {
 const check_tbl_query = "SELECT count(*) from information_schema.tables WHERE table_schema = 'sql6429122' AND table_name = 'users' LIMIT 1;"
 const create_tbl_query = "CREATE TABLE users(id int NOT NULL AUTO_INCREMENT, name VARCHAR(50), ronin VARCHAR(255), percent_manager int,  PRIMARY KEY (id));"
 const get_all_users = "SELECT * from users"
-const get_all_day_data = "SELECT * from everybody_tot_scholars"
+const get_all_day_data = "SELECT * from everybody_day_scholars"
 const get_total_day_scholar = "SELECT * from total_dayscholar"
 const get_all_sums = "SELECT SUM(before7) as before7, SUM(before6) as before6 , SUM(before5) as before5, SUM(before4) as before4, SUM(before3) as before3, SUM(before2) as before2, SUM(yesterday) as yesterday from everybody_tot_scholars"
 
@@ -105,6 +105,10 @@ pool.getConnection(function(err,connection){
     console.log('connected as id ' + connection.threadId);
 });
 
+
+// Get all daily scholar of everybody
+// everybody_day_scholars
+
 app.get("/daydata", function(req, res) {
     pool.getConnection((err, connection) => {
         if(!err) 
@@ -114,6 +118,8 @@ app.get("/daydata", function(req, res) {
         })
     })
 })
+
+// Get all scholars sum (before7 -> yesterday) row 1
 
 app.get("/total_daydata", function(req, res) {
     pool.getConnection((err, connection) => {
@@ -183,10 +189,7 @@ app.post("/add-day-scholar", function(req, res) {
 app.post("/delete-user", function (req,res) {
     pool.getConnection((err, connection) =>{
         if (!err) 
-        // DELETE `users`, `everybody_tot_scholars` FROM `users`, `everybody_tot_scholars` 
-        // WHERE `users`.`ronin`=`everybody_tot_scholars`.`name`
-        // AND `users`.`name` = 'brown';
-        connection.query("DELETE `users`, `everybody_tot_scholars` FROM `users`, `everybody_tot_scholars` WHERE `users`.`ronin` = `everybody_tot_scholars`.`name` AND `users`.`name` = '" + req.body.name + "';"), (err, rows) =>{
+            connection.query("DELETE `users`, `everybody_tot_scholars` FROM `users`, `everybody_tot_scholars` WHERE `users`.`ronin` = `everybody_tot_scholars`.`name` AND `users`.`name` = '" + req.body.name + "';"), (err, rows) =>{
             if (!err) {
                 // connection.query("DELETE FROM everybody_tot_scholars WHERE name='"+ address +"';"), (err, rows) => {
                     res.send("Deleted");

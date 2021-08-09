@@ -270,7 +270,7 @@ class AdminNavbar extends React.Component {
   handleFileRead = () => {
     var file_data = fileReader.result;
     file_data = JSON.parse(file_data);
-
+    document.getElementById("cover-spin").style.display = "inherit";
     var ronin_address_group = this.state.ronin_address_group;
     console.log(typeof file_data, file_data);
     let this_one = this;
@@ -414,6 +414,9 @@ class AdminNavbar extends React.Component {
         })
 
       }
+      if (index === file_data.length - 1) {
+        document.getElementById("cover-spin").style.display = "none";
+      }
        
     }
   }
@@ -552,6 +555,12 @@ class AdminNavbar extends React.Component {
               .then(function (response) {
                 alert(response.data);
               })
+            axios 
+              .post('http://localhost/add-day-scholar', {ronin: ronin})
+              .then(function (response) {
+                alert(response.data);
+              })
+      
 
             let new_data = {
               "name": new_name,
