@@ -242,7 +242,6 @@ class AdminNavbar extends React.Component {
        start_date.setDate(start_date.getDate() + 1);
      }
      this.setState( {date} );
-     console.log(date);
   }
   async know_server() {
 
@@ -268,15 +267,17 @@ class AdminNavbar extends React.Component {
   }
   
   
-  handleFileRead = async () => {
+  handleFileRead = () => {
     var file_data = fileReader.result;
     file_data = JSON.parse(file_data);
+
+    var ronin_address_group = this.state.ronin_address_group;
     console.log(typeof file_data, file_data);
     let this_one = this;
     for (let index = 0; index < file_data.length; index++) {
       let ronin = file_data[index].eth.replace("ronin:", "0x");
-      if (!this.state.ronin_address_group.includes(file_data[index].eth)) {
-        await axios
+      if (!ronin_address_group.includes(file_data[index].eth)) {
+        axios
         .get('https://api.lunaciarover.com/stats/' + ronin)
         .then(function (response) {
             // Add name to the name_group
@@ -300,7 +301,6 @@ class AdminNavbar extends React.Component {
             // Calculate scholar count
             this_one.setState({ scholar_count: index + 1 });
 
-            console.log(response, response.data.slp);
             // Calculate total slp
             const total_one = response.data.total_slp;
             const tot_total_one = this_one.state.all_total.total + total_one;
@@ -345,14 +345,12 @@ class AdminNavbar extends React.Component {
 
             // Get the elo
             var elo = response.data.mmr;
-            
-            
 
             // Make array Data
 
             const new_data = {
               "name": file_data[index].name,
-              "ronin": file_data[index].ronin,
+              "ronin": file_data[index].eth,
               "avg": avg_slp,
               "today_so": today_so,
               "elo": elo,
@@ -404,11 +402,17 @@ class AdminNavbar extends React.Component {
           console.log(error);
         }); 
 
-        await axios 
+       axios 
         .post('http://localhost/add-new', { name: file_data[index].name, ronin: file_data[index].eth, percent_manager: file_data[index].managerShare})
         .then(function (response) {
           alert(response.data);
         })
+        axios 
+        .post('http://localhost/add-day-scholar', {ronin: file_data[index].eth})
+        .then(function (response) {
+          alert(response.data);
+        })
+
       }
        
     }
@@ -463,12 +467,6 @@ class AdminNavbar extends React.Component {
         .then(function (response) {
           console.log(response.data);
           if (response.data)
-          // (response.data.last_claim_timestamp === 0) {
-          //   alert("Wrong input data! Try again")
-          //   document.getElementById("cover-spin").style.display = "none";
-
-          // }
-          // else
            {
             // Add name to the name_group
             let new_name = this_one.state.name;
@@ -595,8 +593,6 @@ class AdminNavbar extends React.Component {
               [...elements].forEach(el => {
                 el.value = '';
             });
-            
-            // document.getElementsByClassName("input-header").style.display = "none";
           }
         })
         .catch(function (error) {
@@ -619,7 +615,6 @@ class AdminNavbar extends React.Component {
 
   sortFunction(item, index){
     var { data, order } = this.state;
-    
     console.log("original ",  data);
     var temp = [];
     if (order[index] === 1){
@@ -671,7 +666,7 @@ class AdminNavbar extends React.Component {
         this.sortFunction("unclaimed", 6);        
         break;
       case "ronin":
-        this.sortFunction("ronin", 7);        
+        this.sortFunction("ronin_slp", 7);        
         break;
       case "scholar":
         this.sortFunction("scholar", 8);        
@@ -972,7 +967,7 @@ class AdminNavbar extends React.Component {
   delete_one(e) {
     // Catch the whole data from state
     let data = this.state.data;
-    axios.post('http://localhost/delete-user',{name: data[e].name})
+    axios.post('http://localhost/delete-user',{name: data[e].name, ronin: data[e].ronin})
          .then(function (response) {
            alert(response.data);
          })
@@ -1064,6 +1059,7 @@ class AdminNavbar extends React.Component {
 
   }
   render() {
+    console.log(this.state.data);
     var table_data = this.state.data.map((anObjectMapped, index) => {
       return (
         <tr key={index}>
