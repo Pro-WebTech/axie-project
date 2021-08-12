@@ -33,13 +33,13 @@ var pool      =    mysql.createPool({
 });
 
 var midnight = "0:00:00";
-var oneminute = "0:01:00";
+var oneminute = "0:18:00";
 var now = null;
 
 setInterval(function () {
     var utcMoment = moment.utc();
     now = utcMoment.format("H:mm:ss");
-    console.log(now);
+    // console.log(now)
     if (now === midnight) {
         console.log("Hi, happy new day.");
         pool.getConnection(function(err,connection){
@@ -64,7 +64,6 @@ setInterval(function () {
 setInterval(function () {
     var utcMoment = moment.utc();
     now = utcMoment.format("H:mm:ss");
-    console.log(now);
     if (now === oneminute) {
         console.log("Hi, one minute.");
         pool.getConnection(function(err,connection){
@@ -74,20 +73,6 @@ setInterval(function () {
         })
     }
 }, 1000);
-
-
-// setInterval(function () {
-//     var utcMoment = moment.utc();
-//     now = utcMoment.format("H:mm:ss");
-//     console.log(now)
-
-//     if (now === midnight) {
-//         console.log("hi dear");
-//         pool.getConnection(function (err, connection) {
-//             connection.query("DELETE FROM everybody_tot_scholars WHERE (field-1) < 1;")
-//         })
-//     }
-// }, 1000)
 
 const check_tbl_query = "SELECT count(*) from information_schema.tables WHERE table_schema = 'sql6429122' AND table_name = 'users' LIMIT 1;"
 const create_tbl_query = "CREATE TABLE users(id int NOT NULL AUTO_INCREMENT, name VARCHAR(50), ronin VARCHAR(255), percent_manager int,  PRIMARY KEY (id));"
@@ -106,144 +91,176 @@ pool.getConnection(function(err,connection){
 });
 
 
-// Get all daily scholar of everybody
-// everybody_day_scholars
+// Get all daily scholar of everybody from the table *everybody_day_scholars*
 
-app.get("/daydata", function(req, res) {
-    pool.getConnection((err, connection) => {
-        if(!err) 
-        connection.query(get_all_day_data, (err, rows) => {
-            connection.release()
-            res.send(rows);
+    app.get("/daydata", function(req, res) {
+        pool.getConnection((err, connection) => {
+            if(!err) 
+            connection.query(get_all_day_data, (err, rows) => {
+                console.log(rows);
+                res.send(rows);
+            })
         })
     })
-})
 
-// Get all scholars sum (before7 -> yesterday) row 1
+// Get all scholars sum (before7 -> yesterday) from the table *total_dayscholar*
 
-app.get("/total_daydata", function(req, res) {
-    pool.getConnection((err, connection) => {
-        if(!err) 
-        connection.query(get_all_sums, (err, result) => {
-            if(!err)
-            connection.query("UPDATE total_dayscholar SET before7 = '" + result[0].before7 + "' , before6 ='" + result[0].before6 + "', before5 ='" + result[0].before5 + "', before4 ='" + result[0].before4 + "', before3 ='" + result[0].before3 + "', before2 ='" + result[0].before2 + "', yesterday = '" + result[0].yesterday + "';", (err, rows) => {
+    app.get("/total_daydata", function(req, res) {
+        pool.getConnection((err, connection) => {
+            if(!err) 
+            connection.query(get_all_sums, (err, result) => {
                 if(!err)
-                    connection.query(get_total_day_scholar, (err, rows) => {
+                connection.query("UPDATE total_dayscholar SET before7 = '" + result[0].before7 + "' , before6 ='" + result[0].before6 + "', before5 ='" + result[0].before5 + "', before4 ='" + result[0].before4 + "', before3 ='" + result[0].before3 + "', before2 ='" + result[0].before2 + "', yesterday = '" + result[0].yesterday + "';", (err, rows) => {
+                    if(!err)
+                        connection.query(get_total_day_scholar, (err, rows) => {
+                            connection.release()
+                            res.send(rows);
+                        })
+                })
+            })
+        })
+    })
+
+// Get data of all users from the table *users*
+
+    app.get("/ronins",function(req,res){
+        pool.getConnection((err, connection) => {
+            if(err) throw err
+            console.log('connected as id ' + connection.threadId)
+            connection.query(check_tbl_query, (err, rows) => {
+                if (Object.values(rows[0])[0] === 1) {
+                    console.log("Exist")
+                    connection.query(get_all_users, (err, rows) => {
                         connection.release()
                         res.send(rows);
                     })
-            })
-        })
-    })
-})
-
-
-app.get("/ronins",function(req,res){
-     pool.getConnection((err, connection) => {
-        if(err) throw err
-        console.log('connected as id ' + connection.threadId)
-        connection.query(check_tbl_query, (err, rows) => {
-            if (Object.values(rows[0])[0] === 1) {
-                console.log("Exist")
-                connection.query(get_all_users, (err, rows) => {
-                    connection.release()
-                    res.send(rows);
-                })
-            }
-            else {
-                console.log("Not exist create")
-                connection.query(create_tbl_query, (err, rows) => {
-                    if (!err) {
-                        res.send("Created");
-                    }
-                });
-            }
-        })
-    })
-});
-app.post("/add-new", function (req,res) {
-    var address = req.body.ronin;
-    pool.getConnection((err, connection) =>{
-        if (!err) {
-            connection.query("INSERT INTO users (name, ronin, percent_manager) VALUES ('" +req.body.name + "','" + req.body.ronin + "', '" + req.body.percent_manager + "'); "),(err, rows) =>{
-                // if (!err) {
-                //     connection.query("INSERT INTO everybody_tot_scholars (name) VALUES ('" + address + "');")
-                    res.send("Created");
-                    
-                // }
-            }
-        }
-
-    })
-})
-app.post("/add-day-scholar", function(req, res) {
-    pool.getConnection((err, connection) => {
-        if (!err) {
-            connection.query("INSERT INTO everybody_tot_scholars (name) VALUES ('" + req.body.ronin + "');"), (err, rows) => {
-                res.send("add-day created")
-            }
-        }
-    })
-    
-})
-app.post("/delete-user", function (req,res) {
-    pool.getConnection((err, connection) =>{
-        if (!err) 
-            connection.query("DELETE `users`, `everybody_tot_scholars` FROM `users`, `everybody_tot_scholars` WHERE `users`.`ronin` = `everybody_tot_scholars`.`name` AND `users`.`name` = '" + req.body.name + "';"), (err, rows) =>{
-            if (!err) {
-                // connection.query("DELETE FROM everybody_tot_scholars WHERE name='"+ address +"';"), (err, rows) => {
-                    res.send("Deleted");
-
-                // }
-            }
-                
-        }
-
-    })
-})
-app.post("/download", function (req,res) {
-    pool.getConnection((err, connection) => {
-        if(err) throw err
-        console.log('connected as id ' + connection.threadId)
-        connection.query(check_tbl_query, (err, rows) => {
-            if (Object.values(rows[0])[0] === 1) {
-                console.log("Exist")
-                connection.query(get_all_users, (err, rows) => {
-                    connection.release()
-                    res.send(rows);
-                })
-            }
-            else {
-                res.send("no data");
-            }
-        })
-    })
-})
-app.post("/edit-name", function (req, res) {
-    pool.getConnection((err, connection) =>{
-        if (!err) {
-            connection.query("UPDATE users SET name = '" + req.body.name + "' WHERE name = '" + req.body.old_name + "';")
-        }
-    })
-    
-})
-
-app.post("/edit-ronin", function (req, res) {
-    pool.getConnection((err, connection) => {
-        if (!err) {
-            console.log(connection.query("UPDATE users SET `name` = '" + req.body.name + "' , ronin ='" + req.body.ronin + "', percent_manager = '" + req.body.percent + "' WHERE `name` = '" + req.body.old_name + "';" ), (err, rows) =>{
-                if (!err) {
-                    connection.query("UPDATE users SET name = '" + req.body.name + "' , ronin ='" + req.body.ronin + "', percent_manager = '" + req.body.percent + "';" )
-                    console.log(rows);
-                    res.send("Edited")
+                }
+                else {
+                    console.log("Not exist create")
+                    connection.query(create_tbl_query, (err, rows) => {
+                        if (!err) {
+                            res.send("Created");
+                        }
+                    });
                 }
             })
-        }
-    })
+        })
+    });
+
+
+
+// Add new user to three tables *users*, *everybody_tot_scholars*, *everybody_day_scholars*
+
+    // Add new user to the table *users*
+        app.post("/add-new", function (req,res) {
+            pool.getConnection((err, connection) =>{
+                if (!err) {
+                    connection.query("INSERT INTO users (name, ronin, percent_manager) VALUES ('" +req.body.name + "','" + req.body.ronin + "', '" + req.body.percent_manager + "'); "),(err, rows) =>{
+                            res.send("Created");
+                    }
+                }
+            })
+        })
     
-})
+    // Add new user to the table *everybody_tot_scholars*
+        app.post("/add-tot-scholars", function(req, res) {
+            pool.getConnection((err, connection) => {
+                if (!err) {
+                    connection.query("INSERT INTO everybody_tot_scholars (name, ronin) VALUES ('" +req.body.name + "','" + req.body.ronin + "');"), (err, rows) => {
+                        res.send("add-tot created")
+                    }
+                }
+            })
+        })
+    
+    // Add new user to the table *everybody_day_scholars*
+        app.post("/add-day-scholars", function(req, res) {
+            pool.getConnection((err, connection) => {
+                if (!err) {
+                    connection.query("INSERT INTO everybody_day_scholars (name) VALUES ('" +req.body.name + "','" + req.body.ronin + "');"), (err, rows) => {
+                        res.send("add-day created")
+                    }
+                }
+            })
+        })
+
+// End Add part
+
+// Delete selected user from three tables *users*, *everybody_tot_scholars*, *everybody_day_scholars*
+
+    // Delete user from the tables *users*, *everybody_tot_scholars*
+        app.post("/delete-user", function (req,res) {
+            pool.getConnection((err, connection) =>{
+                if (!err) 
+                    connection.query("DELETE `users`, `everybody_tot_scholars` FROM `users`, `everybody_tot_scholars` WHERE `users`.`ronin` = `everybody_tot_scholars`.`ronin` AND `users`.`name` = '" + req.body.name + "';"), (err, rows) =>{
+                    if (!err) {
+                            res.send("Deleted");
+                    }
+                }
+            })
+        })
+
+    // Delete user from the table *everybody_day_scholars*
+        app.post("/delete-day-scholars", function (req,res) {
+            pool.getConnection((err, connection) =>{
+                if (!err) 
+                    connection.query("DELETE FROM `everybody_day_scholars` WHERE `ronin` = '" + req.body.ronin + "';"), (err, rows) =>{
+                    if (!err) {
+                            res.send("Deleted");
+                    }
+                }
+            })
+        })
+
+// End Delete part
 
 
+// Get data from the table *users* to download
+    app.post("/download", function (req,res) {
+        pool.getConnection((err, connection) => {
+            if(err) throw err
+            console.log('connected as id ' + connection.threadId)
+            connection.query(check_tbl_query, (err, rows) => {
+                if (Object.values(rows[0])[0] === 1) {
+                    console.log("Exist")
+                    connection.query(get_all_users, (err, rows) => {
+                        connection.release()
+                        res.send(rows);
+                    })
+                }
+                else {
+                    res.send("no data");
+                }
+            })
+        })
+    })
 
+// Edit name of a row in the table *users*
+
+    app.post("/edit-name", function (req, res) {
+        pool.getConnection((err, connection) =>{
+            if (!err) {
+                connection.query("UPDATE users SET name = '" + req.body.name + "' WHERE name = '" + req.body.old_name + "';")
+            }
+        })
+        
+    })
+
+
+// Edit a row in the table *users*
+
+    app.post("/edit-ronin", function (req, res) {
+        pool.getConnection((err, connection) => {
+            if (!err) {
+                console.log(connection.query("UPDATE users SET `name` = '" + req.body.name + "' , ronin ='" + req.body.ronin + "', percent_manager = '" + req.body.percent + "' WHERE `name` = '" + req.body.old_name + "';" ), (err, rows) =>{
+                    if (!err) {
+                        connection.query("UPDATE users SET name = '" + req.body.name + "' , ronin ='" + req.body.ronin + "', percent_manager = '" + req.body.percent + "';" )
+                        console.log(rows);
+                        res.send("Edited")
+                    }
+                })
+            }
+        })
+    })
 
 app.listen(port, () => console.log(`Listening on port ${port}`))

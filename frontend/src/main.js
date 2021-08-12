@@ -90,6 +90,7 @@ class AdminNavbar extends React.Component {
     this.tog_standard = this.tog_standard.bind(this);
   }
   tog_standard(ronin) {
+      console.log(ronin);
       this.setState({selected_ronin: ronin});
       this.setState(prevState => ({
           modal_detail: !prevState.modal_detail
@@ -408,7 +409,12 @@ class AdminNavbar extends React.Component {
           alert(response.data);
         })
         axios 
-        .post('http://localhost/add-day-scholar', {ronin: file_data[index].eth})
+        .post('http://localhost/add-tot-scholars', {name: file_data[index].name, ronin: file_data[index].eth})
+        .then(function (response) {
+          alert(response.data);
+        })
+        axios 
+        .post('http://localhost/add-day-scholars', {name: file_data[index].name, ronin: file_data[index].eth})
         .then(function (response) {
           alert(response.data);
         })
@@ -556,7 +562,12 @@ class AdminNavbar extends React.Component {
                 alert(response.data);
               })
             axios 
-              .post('http://localhost/add-day-scholar', {ronin: ronin})
+              .post('http://localhost/add-tot-scholars', {name: new_name, ronin: ronin})
+              .then(function (response) {
+                alert(response.data);
+              })
+            axios 
+              .post('http://localhost/add-day-scholars', {name: new_name, ronin: ronin})
               .then(function (response) {
                 alert(response.data);
               })
@@ -980,6 +991,10 @@ class AdminNavbar extends React.Component {
          .then(function (response) {
            alert(response.data);
          })
+    axios.post('http://localhost/delete-day-scholars', {ronin: data[e].ronin})
+         .then(function (response) {
+           alert(response.data);
+         })
     console.log(data[e].name);
     // Catch ronin_address_group, name_group and Update them
     let ronin_address_group = this.state.ronin_address_group;
@@ -1107,7 +1122,8 @@ class AdminNavbar extends React.Component {
     }
     
     day_data.map((element, index) =>{
-      if (element.name === selected_ronin){
+      console.log(element,selected_ronin);
+      if (element.ronin === selected_ronin){
         bar_data.push(element.before7);
         bar_data.push(element.before6);
         bar_data.push(element.before5);
@@ -1116,6 +1132,7 @@ class AdminNavbar extends React.Component {
         bar_data.push(element.before2);
         bar_data.push(element.yesterday);
       }
+      
     })
     
     const data1={
@@ -1132,6 +1149,7 @@ class AdminNavbar extends React.Component {
             }
         ]
     }
+    console.log(data1);
     return (
       <>
         <Navbar id="navbar-main" >
